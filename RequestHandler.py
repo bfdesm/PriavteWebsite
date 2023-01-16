@@ -22,7 +22,7 @@ class RequestHandler(object):
     def handlerRequest(self):
         self.sendMsgToNote("INFO", "waitConnect: server: " + str(self.addr) + " client connect to me successfully")
         status, data = self.getText()
-        result = self.executeRequest(data)
+        reponse = self.executeRequest(data)
         reponse = self.initmsg
         self.sendText(reponse)
         # self.sendText(json.dumps(self.initmsg), conn)
@@ -68,13 +68,13 @@ class RequestHandler(object):
 
 
     def sendText(self, data):
+        byteData = str(data).encode()
         try:
             header = 'HTTP/1.1 200 OK\n'
             header += 'Content-Type: text/html;charset=utf-8\r\n'
             header += 'Connection: keep-alive\r\n'  # 和客户端保持长连接
             header += '\n'
-            print(header + data)
-            byteData = str(data).encode()
+            print(header + str(data))
             self.conn.send(header.encode() + byteData)
             # self.conn.send(byteData)
         except Exception as e:
