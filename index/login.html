@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="stylesheet" href="css/login.css"/>
+  <title>登录</title>
+</head>
+<body>
+
+<div class="main">
+  <div class="title">
+    <a href="/user/login" style="text-decoration:none; color: black">密码登录</a>
+    <a href="/user/sign" style="text-decoration:none; color: black">注册</a>
+  </div>
+  <div class="login-form">
+    <!--输入框-->
+    <div class="input-content">
+      <!--autoFocus-->
+      <div>
+        <input type="text" autocomplete="off"
+               placeholder="用户名" name="nickName" required/>
+      </div>
+
+      <div>
+        <input type="password"
+               autocomplete="off" placeholder="登录密码" name="pwd" required maxlength="32"/>
+      </div>
+    </div>
+    <div>
+      <button type="submit" class="enter-btn" >登录</button>
+    </div>
+    <div>
+      <input type="checkbox"
+             autocomplete="off" placeholder="密码" name="password" required maxlength="32" disabled/>下次自动登录
+    </div>
+  </div>
+</div>
+<script>
+  const sendbtn = document.querySelector(".enter-btn");
+  sendbtn.addEventListener("click", function () {
+    let nickName = document.querySelector(".nickName").value;
+    let pwd = document.querySelector(".pwd").value;
+    let user = {
+      nickName: nickName,
+      pwd : pwd,
+    }
+    user = JSON.stringify(user)
+    console.log(user);
+    fetch(
+      "http://127.0.0.1:8080/user/authenticate",
+      {
+        method: 'POST',
+        body: user,
+        headers: {
+          'content-type': 'application/json'
+        }
+      }
+    )
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(myJson) {
+      console.log(myJson);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,4 +1,7 @@
 import time
+import HttpFactory
+import RouteHandler
+
 
 class RequestHandler(object):
     def __init__(self, conn, addr, noteSystem=None, debug=False) -> None:
@@ -6,7 +9,7 @@ class RequestHandler(object):
         self.addr = addr
         self.noteSystem = noteSystem
         self.debug = debug
-        self.initmsg = {"text": "hello, it is my ASP"}
+        self.routeHandler = RouteHandler.RouteHandler()
 
 
     def sendMsgToNote(self, grade, msg):
@@ -19,13 +22,23 @@ class RequestHandler(object):
             self.noteSystem.sendMsgToNote(grade, msg)
 
 
+    def getTime(self):
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+
     def handlerRequest(self):
         self.sendMsgToNote("INFO", "waitConnect: server: " + str(self.addr) + " client connect to me successfully")
         status, data = self.getText()
-        reponse = self.executeRequest(data)
-        reponse = self.initmsg
-        self.sendText(reponse)
-        # self.sendText(json.dumps(self.initmsg), conn)
+        result = self.executeRequest(data)
+        response = "404 Not Found"
+        if result != None:
+            response = self.routeHandler.searchFile(result["path"])
+        if "/css/" in result["path"]:
+            header = HttpFactory.generateHeader(contentType="text/css")
+        else:
+            header = HttpFactory.generateHeader()
+        response = header + response
+        self.send(response)
         self.closeConn()
 
 
@@ -50,7 +63,11 @@ class RequestHandler(object):
         if not isinstance(data, str):
             data = data.decode()
         datas = data.split("\r\n")
-        result = {"first": datas[0]}
+        result = {}
+        first = datas[0].split(" ")
+        result["method"] = first[0]
+        result["path"] = first[1]
+        result["httpversion"] = first[2]
         for i in range(1, len(datas)):
             index = 0
             tmpdata = datas[i]
@@ -65,18 +82,18 @@ class RequestHandler(object):
         result["addr"] = self.addr
         result["conn"] = self.conn
         print(result)
+        return result
 
 
-    def sendText(self, data):
+    def endTcp(self):
+        data = HttpFactory.generateEndHeader()
+        self.send(data)
+
+
+    def send(self, data):
         byteData = str(data).encode()
         try:
-            header = 'HTTP/1.1 200 OK\n'
-            header += 'Content-Type: text/html;charset=utf-8\r\n'
-            header += 'Connection: keep-alive\r\n'  # 和客户端保持长连接
-            header += '\n'
-            print(header + str(data))
-            self.conn.send(header.encode() + byteData)
-            # self.conn.send(byteData)
+            self.conn.send(byteData)
         except Exception as e:
             self.sendMsgToNote("INFO", "sendText: client: server`s reflect is timeout")
 
@@ -84,8 +101,4 @@ class RequestHandler(object):
     def closeConn(self):
         if self.conn != None:
             self.conn.close()
-
-
-    def getTime(self):
-        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
