@@ -8,7 +8,7 @@
 ### 获得请求,解析请求,发送响应,关闭套接字
 ## RouteHandler.py 路由处理器
 ### 目前支持请求: GET
-### 文件放到index目录下,默认都是寻找html文件,还不支持css,JavaScript
+### 文件放到index目录下,默认都是寻找css,html文件,还不支持JavaScript
 #### eg1: http://127.0.0.1:81/login.html <==> http://127.0.0.1:81/login
 #### eg2: http://127.0.0.1:81/1.txt
 #### eg3: 没有找到文件返回 "404 Not Found"
